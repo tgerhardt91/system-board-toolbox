@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: "jdbc:sqlite:src/main/resources/data/tension_dump.db"
+    driver-class-name: org.sqlite.JDBC
+    username: ""
+    password: ""
+
+  # Prevent Spring from trying to auto-run schema.sql / data.sql
+  sql:
+    init:
+      mode: never
+
+  # Disable Hibernate/JPA autoconfiguration — SQLite is not a supported JPA dialect
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
