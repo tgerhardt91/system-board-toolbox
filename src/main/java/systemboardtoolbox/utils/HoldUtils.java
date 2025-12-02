@@ -3,6 +3,7 @@ package systemboardtoolbox.utils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.experimental.UtilityClass;
+import systemboardtoolbox.enums.GradeType;
 import systemboardtoolbox.models.MirroredHold;
 
 import java.io.IOException;

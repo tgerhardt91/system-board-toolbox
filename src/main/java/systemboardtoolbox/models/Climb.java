@@ -22,6 +22,19 @@ public class Climb {
     private String description;
     private String frames;
     private boolean noMatching;
+    private Float difficultyAverage;
+    private Integer ascentionistCount;
+    private Float qualityAverage;
+    private Integer difficulty;
+    private Integer quality;
+
+    public Integer getDifficulty() {
+        return difficultyAverage != null ? Math.round(difficultyAverage) : null;
+    }
+
+    public Integer getQuality() {
+        return qualityAverage != null ? Math.round(qualityAverage) : null;
+    }
 
     public static class ClimbRowMapper implements RowMapper<Climb> {
         @Override
@@ -34,6 +47,9 @@ public class Climb {
                     .description(rs.getString("description"))
                     .frames(rs.getString("frames"))
                     .noMatching(rs.getBoolean("is_nomatch"))
+                    .difficultyAverage(rs.getFloat("difficulty_average"))
+                    .qualityAverage(rs.getFloat("quality_average"))
+                    .ascentionistCount(rs.getInt("ascensionist_count"))
                     .build();
         }
     }

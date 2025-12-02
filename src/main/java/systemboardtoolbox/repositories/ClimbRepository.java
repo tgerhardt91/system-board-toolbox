@@ -29,7 +29,10 @@ public class ClimbRepository {
         int count = jdbc.queryForObject(countSql, params, Integer.class);
 
         //main query
-        String baseSql = "SELECT * FROM climbs c";
+        String baseSql = """
+        SELECT c.*, cs.difficulty_average, cs.ascensionist_count, cs.quality_average from climbs c
+        LEFT JOIN climb_stats cs ON (cs.climb_uuid = c.uuid AND cs.angle = c.angle)
+        """;
         sqlStringBuilder.append(baseSql);
         sqlStringBuilder.append(whereClause);
 
