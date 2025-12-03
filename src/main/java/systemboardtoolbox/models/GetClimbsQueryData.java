@@ -22,6 +22,8 @@ public class GetClimbsQueryData {
     private String setter;
     private List<String> holdFrames;
     private List<String> mirroredHoldFrames;
+    private Integer minGrade;
+    private Integer maxGrade;
 
     public static GetClimbsQueryData of(GetClimbsRequest request) {
         return GetClimbsQueryData.builder()
@@ -29,8 +31,9 @@ public class GetClimbsQueryData {
                 .pageSize(request.getPageSize())
                 .layout(request.getLayout())
                 .setter(request.getSetter())
-                .holdFrames(request.isRequireTypeMatch() ? request.getHoldFrames() :
-                        HoldUtils.getHoldFramesWithoutRId(request.getHoldFrames()))
+                .holdFrames(request.getHoldFrames())
+                .minGrade(request.getMinGrade())
+                .maxGrade(request.getMaxGrade())
                 .build();
     }
 }

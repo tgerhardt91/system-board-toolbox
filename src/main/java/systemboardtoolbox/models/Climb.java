@@ -21,6 +21,7 @@ public class Climb {
     private String setter;
     private String description;
     private String frames;
+    private Integer angle;
     private boolean noMatching;
     private Float difficultyAverage;
     private Integer ascentionistCount;
@@ -46,6 +47,7 @@ public class Climb {
                     .setter(rs.getString("setter_username"))
                     .description(rs.getString("description"))
                     .frames(rs.getString("frames"))
+                    .angle(rs.getInt("angle"))
                     .noMatching(rs.getBoolean("is_nomatch"))
                     .difficultyAverage(rs.getFloat("difficulty_average"))
                     .qualityAverage(rs.getFloat("quality_average"))

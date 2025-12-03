@@ -22,4 +22,8 @@ public class GetClimbsRequest {
     private List<String> holdFrames;
     private boolean requireTypeMatch;
     private boolean includeClimbsWithMirroredHolds;
+    //todo: add min/max validation
+    private Integer minGrade;
+    //todo: add min/max validation
+    private Integer maxGrade;
 }

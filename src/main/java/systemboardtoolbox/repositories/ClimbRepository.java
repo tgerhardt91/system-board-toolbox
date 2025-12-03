@@ -25,7 +25,11 @@ public class ClimbRepository {
         var whereClause = getWhereClause(queryData, params);
 
         //count query
-        String countSql = "SELECT COUNT(*) FROM climbs c " + whereClause;
+        String countSql = """
+            SELECT COUNT(*)
+            FROM climbs c
+            LEFT JOIN climb_stats cs ON (cs.climb_uuid = c.uuid AND cs.angle = c.angle)
+            """ + whereClause;
         int count = jdbc.queryForObject(countSql, params, Integer.class);
 
         //main query
@@ -36,7 +40,8 @@ public class ClimbRepository {
         sqlStringBuilder.append(baseSql);
         sqlStringBuilder.append(whereClause);
 
-        sqlStringBuilder.append("LIMIT :limit OFFSET :offset");
+        sqlStringBuilder.append(" ORDER BY cs.ascensionist_count DESC");
+        sqlStringBuilder.append(" LIMIT :limit OFFSET :offset");
         params.put("limit", queryData.getPageSize());
         params.put("offset", pagingOffset);
 
@@ -58,6 +63,8 @@ public class ClimbRepository {
                 && !queryData.getHoldFrames().isEmpty();
         var hasMirroredHoldFilter = queryData.getMirroredHoldFrames() != null
                 && !queryData.getMirroredHoldFrames().isEmpty();
+        var hasMinGradeFilter = queryData.getMinGrade() != null;
+        var hasMaxGradeFilter = queryData.getMaxGrade() != null;
 
         var sb = new StringBuilder();
 
@@ -78,6 +85,14 @@ public class ClimbRepository {
             }
             var frameFilter = buildFrameFilterGroups(holdFrameLists, params);
             sb.append(frameFilter);
+        }
+        if(hasMinGradeFilter) {
+            sb.append(" AND cs.difficulty_average >= :minGrade");
+            params.put("minGrade", queryData.getMinGrade());
+        }
+        if(hasMaxGradeFilter) {
+            sb.append(" AND cs.difficulty_average <= :maxGrade");
+            params.put("maxGrade", queryData.getMaxGrade());
         }
 
         return sb.toString();
