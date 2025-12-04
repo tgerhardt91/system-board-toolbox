@@ -24,18 +24,10 @@ public class ClimbRepository {
         var params = new HashMap<String, Object>();
         var whereClause = getWhereClause(queryData, params);
 
-        //count query
-        String countSql = """
-            SELECT COUNT(*)
-            FROM climbs c
-            LEFT JOIN climb_stats cs ON (cs.climb_uuid = c.uuid AND cs.angle = c.angle)
-            """ + whereClause;
-        int count = jdbc.queryForObject(countSql, params, Integer.class);
-
         //main query
         String baseSql = """
         SELECT c.*, cs.difficulty_average, cs.ascensionist_count, cs.quality_average from climbs c
-        LEFT JOIN climb_stats cs ON (cs.climb_uuid = c.uuid AND cs.angle = c.angle)
+        LEFT JOIN climb_stats cs ON (cs.climb_uuid = c.uuid AND cs.angle = :angle)
         """;
         sqlStringBuilder.append(baseSql);
         sqlStringBuilder.append(whereClause);
@@ -44,6 +36,16 @@ public class ClimbRepository {
         sqlStringBuilder.append(" LIMIT :limit OFFSET :offset");
         params.put("limit", queryData.getPageSize());
         params.put("offset", pagingOffset);
+        var angle = queryData.hasAngle() ? queryData.getAngle() : 40;
+        params.put("angle", angle);
+
+        //count query
+        String countSql = """
+            SELECT COUNT(*)
+            FROM climbs c
+            LEFT JOIN climb_stats cs ON (cs.climb_uuid = c.uuid AND cs.angle = :angle)
+            """ + whereClause;
+        int count = jdbc.queryForObject(countSql, params, Integer.class);
 
         var mapper = new Climb.ClimbRowMapper();
         var climbs = jdbc.query(sqlStringBuilder.toString(), params, mapper);
@@ -57,42 +59,33 @@ public class ClimbRepository {
     }
 
     private String getWhereClause(GetClimbsQueryData queryData, Map<String, Object> params) {
-        var hasSetterFilter = !Strings.isBlank(queryData.getSetter());
-        var hasLayoutFilter = queryData.getLayout() != null && !queryData.getLayout().equals(Layout.UNKNOWN);
-        var hasHoldFilter = queryData.getHoldFrames() != null
-                && !queryData.getHoldFrames().isEmpty();
-        var hasMirroredHoldFilter = queryData.getMirroredHoldFrames() != null
-                && !queryData.getMirroredHoldFrames().isEmpty();
-        var hasMinGradeFilter = queryData.getMinGrade() != null;
-        var hasMaxGradeFilter = queryData.getMaxGrade() != null;
-
         var sb = new StringBuilder();
 
         sb.append(" WHERE 1 = 1");
-        if (hasSetterFilter) {
+        if (queryData.hasSetter()) {
             sb.append(" AND c.setter_username = :setterUsername");
             params.put("setterUsername", queryData.getSetter());
         }
-        if (hasLayoutFilter) {
+        if (queryData.hasLayout()) {
             sb.append(" AND c.layout_id = :layoutId");
             params.put("layoutId", queryData.getLayout().getId());
         }
-        if (hasHoldFilter) {
+        if (queryData.hasHoldFrames()) {
             var holdFrameLists = new ArrayList<List<String>>();
             holdFrameLists.add(queryData.getHoldFrames());
-            if(hasMirroredHoldFilter) {
+            if(queryData.hasMirroredHoldFrames()) {
                 holdFrameLists.add(queryData.getMirroredHoldFrames());
             }
             var frameFilter = buildFrameFilterGroups(holdFrameLists, params);
             sb.append(frameFilter);
         }
-        if(hasMinGradeFilter) {
+        if(queryData.hasMinGrade()) {
             sb.append(" AND cs.difficulty_average >= :minGrade");
-            params.put("minGrade", queryData.getMinGrade());
+            params.put("minGrade", queryData.getMinGrade() - 0.9);
         }
-        if(hasMaxGradeFilter) {
+        if(queryData.hasMaxGrade()) {
             sb.append(" AND cs.difficulty_average <= :maxGrade");
-            params.put("maxGrade", queryData.getMaxGrade());
+            params.put("maxGrade", queryData.getMaxGrade() + 0.9);
         }
 
         return sb.toString();

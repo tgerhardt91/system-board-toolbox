@@ -26,4 +26,5 @@ public class GetClimbsRequest {
     private Integer minGrade;
     //todo: add min/max validation
     private Integer maxGrade;
+    private Integer angle;
 }
